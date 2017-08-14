@@ -4,7 +4,8 @@ namespace Encore\Admin\Auth\Database;
 
 use Encore\Admin\Traits\AdminBuilder;
 use Encore\Admin\Traits\ModelTree;
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
+//use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -52,7 +53,7 @@ class Menu extends Model
 
         $relatedModel = config('admin.database.roles_model');
 
-        return $this->belongsToMany($relatedModel, $pivotTable, 'menu_id', 'role_id');
+        return $this->belongsToMany($relatedModel, null, 'menu_id', 'role_id');
     }
 
     /**
@@ -60,9 +61,10 @@ class Menu extends Model
      */
     public function allNodes()
     {
-        $orderColumn = DB::getQueryGrammar()->wrap($this->orderColumn);
-        $byOrder = $orderColumn.' = 0,'.$orderColumn;
+        //$orderColumn = DB::getQueryGrammar()->wrap($this->orderColumn);
+        //$byOrder = $orderColumn.' = 0,'.$orderColumn;
 
-        return static::with('roles')->orderByRaw($byOrder)->get()->toArray();
+        //return static::with('roles')->orderByRaw($byOrder)->get()->toArray();
+        return static::with('roles')->orderBy($this->orderColumn, "desc")->get()->toArray();
     }
 }

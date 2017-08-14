@@ -5,7 +5,7 @@ namespace Encore\Admin;
 use Closure;
 use Encore\Admin\Tree\Tools;
 use Illuminate\Contracts\Support\Renderable;
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
 
 class Tree implements Renderable
 {

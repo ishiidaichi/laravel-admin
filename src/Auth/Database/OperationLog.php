@@ -2,7 +2,8 @@
 
 namespace Encore\Admin\Auth\Database;
 
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
+//use Illuminate\Database\Eloquent\Model;
 
 class OperationLog extends Model
 {

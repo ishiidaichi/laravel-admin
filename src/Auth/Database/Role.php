@@ -2,7 +2,8 @@
 
 namespace Encore\Admin\Auth\Database;
 
-use Illuminate\Database\Eloquent\Model;
+use Jenssegers\Mongodb\Eloquent\Model;
+//use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
@@ -35,7 +36,7 @@ class Role extends Model
 
         $relatedModel = config('admin.database.users_model');
 
-        return $this->belongsToMany($relatedModel, $pivotTable, 'role_id', 'user_id');
+        return $this->belongsToMany($relatedModel, null, 'role_id', 'user_id');
     }
 
     /**
@@ -49,7 +50,7 @@ class Role extends Model
 
         $relatedModel = config('admin.database.permissions_model');
 
-        return $this->belongsToMany($relatedModel, $pivotTable, 'role_id', 'permission_id');
+        return $this->belongsToMany($relatedModel, null, 'role_id', 'permission_id');
     }
 
     /**

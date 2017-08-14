@@ -12,7 +12,7 @@ use Encore\Admin\Grid\Filter;
 use Encore\Admin\Grid\Model;
 use Encore\Admin\Grid\Row;
 use Encore\Admin\Grid\Tools;
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,7 +22,6 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Schema;
-use Jenssegers\Mongodb\Eloquent\Model as MongodbModel;
 
 class Grid
 {
@@ -854,7 +853,7 @@ class Grid
     {
         $label = isset($arguments[0]) ? $arguments[0] : ucfirst($method);
 
-        if ($this->model()->eloquent() instanceof MongodbModel) {
+        if ($this->model()->eloquent() instanceof Eloquent) {
             return $this->addColumn($method, $label);
         }
 

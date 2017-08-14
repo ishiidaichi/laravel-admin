@@ -78,7 +78,7 @@ class FileUploadTest extends TestCase
 
         $old = FileModel::first();
 
-        $this->visit('admin/files/1/edit')
+        $this->visit('admin/files/'. $old->id .'/edit')
             ->see('ID')
             ->see('Created At')
             ->see('Updated At')
@@ -117,13 +117,15 @@ class FileUploadTest extends TestCase
 
         $this->uploadFiles();
 
+        $old = FileModel::first();
+
         $this->visit('admin/files')
             ->seeInElement('td', 1);
 
-        $files = FileModel::first()->toArray();
+        $files = $old->toArray();
 
-        $this->delete('admin/files/1')
-            ->dontSeeInDatabase('test_files', ['id' => 1]);
+        $this->delete('admin/files/'.$old->id)
+            ->dontSeeInDatabase('test_files', ['id' => $old->id]);
 
         foreach (range(1, 6) as $index) {
             $this->assertFileNotExists(public_path('upload/'.$files['file'.$index]));

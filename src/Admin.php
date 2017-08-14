@@ -6,7 +6,7 @@ use Closure;
 use Encore\Admin\Auth\Database\Menu;
 use Encore\Admin\Layout\Content;
 use Encore\Admin\Widgets\Navbar;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Jenssegers\Mongodb\Eloquent\Model as EloquentModel;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;

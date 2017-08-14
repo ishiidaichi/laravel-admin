@@ -8,7 +8,9 @@ use Encore\Admin\Form\Builder;
 use Encore\Admin\Form\Field;
 use Encore\Admin\Form\Field\File;
 use Encore\Admin\Form\Tab;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Jenssegers\Mongodb\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -17,6 +19,9 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Validator;
+use Jenssegers\Mongodb\Relations\BelongsToMany;
+use Jenssegers\Mongodb\Relations\HasMany;
+use Jenssegers\Mongodb\Relations\HasOne;
 use Spatie\EloquentSortable\Sortable;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -323,17 +328,15 @@ class Form
             return $response;
         }
 
-        DB::transaction(function () {
-            $inserts = $this->prepareInsert($this->updates);
+        $inserts = $this->prepareInsert($this->updates);
 
-            foreach ($inserts as $column => $value) {
-                $this->model->setAttribute($column, $value);
-            }
+        foreach ($inserts as $column => $value) {
+            $this->model->setAttribute($column, $value);
+        }
 
-            $this->model->save();
+        $this->model->save();
 
-            $this->updateRelation($this->relations);
-        });
+        $this->updateRelation($this->relations);
 
         if (($response = $this->complete($this->saved)) instanceof Response) {
             return $response;
@@ -518,18 +521,16 @@ class Form
             return $response;
         }
 
-        DB::transaction(function () {
-            $updates = $this->prepareUpdate($this->updates);
+        $updates = $this->prepareUpdate($this->updates);
 
-            foreach ($updates as $column => $value) {
-                /* @var Model $this->model */
-                $this->model->setAttribute($column, $value);
-            }
+        foreach ($updates as $column => $value) {
+            /* @var Model $this->model */
+            $this->model->setAttribute($column, $value);
+        }
 
-            $this->model->save();
+        $this->model->save();
 
-            $this->updateRelation($this->relations);
-        });
+        $this->updateRelation($this->relations);
 
         if (($result = $this->complete($this->saved)) instanceof Response) {
             return $result;
@@ -632,8 +633,8 @@ class Form
 
             $relation = $this->model->$name();
 
-            $hasDot = $relation instanceof \Illuminate\Database\Eloquent\Relations\HasOne
-                || $relation instanceof \Illuminate\Database\Eloquent\Relations\MorphOne;
+            $hasDot = $relation instanceof HasOne
+                || $relation instanceof MorphOne;
 
             $prepared = $this->prepareUpdate([$name => $values], $hasDot);
 
@@ -642,13 +643,13 @@ class Form
             }
 
             switch (get_class($relation)) {
-                case \Illuminate\Database\Eloquent\Relations\BelongsToMany::class:
-                case \Illuminate\Database\Eloquent\Relations\MorphToMany::class:
+                case BelongsToMany::class:
+                case MorphToMany::class:
                     if (isset($prepared[$name])) {
                         $relation->sync($prepared[$name]);
                     }
                     break;
-                case \Illuminate\Database\Eloquent\Relations\HasOne::class:
+                case HasOne::class:
 
                     $related = $this->model->$name;
 
@@ -664,7 +665,7 @@ class Form
 
                     $related->save();
                     break;
-                case \Illuminate\Database\Eloquent\Relations\MorphOne::class:
+                case MorphOne::class:
                     $related = $this->model->$name;
                     if (is_null($related)) {
                         $related = $relation->make();
@@ -674,7 +675,7 @@ class Form
                     }
                     $related->save();
                     break;
-                case \Illuminate\Database\Eloquent\Relations\HasMany::class:
+                case HasMany::class:
                 case \Illuminate\Database\Eloquent\Relations\MorphMany::class:
 
                     foreach ($prepared[$name] as $related) {

@@ -153,7 +153,9 @@ class PermissionsTest extends TestCase
             ->seePageIs('admin/auth/users')
             ->seeInDatabase(config('admin.database.users_table'), ['username' => 'Test']);
 
-        $this->assertFalse(Administrator::find(2)->isAdministrator());
+        $admin = Administrator::skip(1)->first();
+
+        $this->assertFalse($admin->isAdministrator());
 
         // 2.add a role
         $this->visit('admin/auth/roles/create')
@@ -162,17 +164,19 @@ class PermissionsTest extends TestCase
             ->seePageIs('admin/auth/roles')
             ->seeInDatabase(config('admin.database.roles_table'), ['slug' => 'developer', 'name' => 'Developer...'])
             ->assertEquals(2, Role::count());
+        $this->assertFalse($admin->isRole('developer'));
 
-        $this->assertFalse(Administrator::find(2)->isRole('developer'));
+        $role = Role::skip(1)->first();
 
         // 3.assign role to user
-        $this->visit('admin/auth/users/2/edit')
+        $this->visit('admin/auth/users/'.$admin->id.'/edit')
             ->see('Edit')
-            ->submitForm('Submit', ['roles' => [2]])
+            ->submitForm('Submit', ['roles' => [$role->id]])
             ->seePageIs('admin/auth/users')
-            ->seeInDatabase(config('admin.database.role_users_table'), ['user_id' => 2, 'role_id' => 2]);
+            ->seeInDatabase(config('admin.database.roles_table'),
+                ['user_ids' => $admin->id]);
 
-        $this->assertTrue(Administrator::find(2)->isRole('developer'));
+        $this->assertTrue($admin->isRole('developer'));
 
         //  4.add a permission
         $this->visit('admin/auth/permissions/create')
@@ -182,16 +186,16 @@ class PermissionsTest extends TestCase
 
         $this->assertEquals(1, Permission::count());
 
-        $this->assertTrue(Administrator::find(2)->cannot('can-remove'));
+        $this->assertTrue($admin->cannot('can-remove'));
 
         // 5.assign permission to role
-        $this->visit('admin/auth/roles/2/edit')
+        $this->visit('admin/auth/roles/'.$admin->id.'/edit')
             ->see('Edit')
             ->submitForm('Submit', ['permissions' => [1]])
             ->seePageIs('admin/auth/roles')
-            ->seeInDatabase(config('admin.database.role_permissions_table'), ['role_id' => 2, 'permission_id' => 1]);
+            ->seeInDatabase(config('admin.database.role_permissions_table'), ['role_id' => $role->id, 'permission_id' => 1]);
 
-        $this->assertTrue(Administrator::find(2)->can('can-remove'));
+        $this->assertTrue($admin->can('can-remove'));
     }
 
     public function testEditPermission()
